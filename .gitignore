@@ -1,13 +1,18 @@
 #"/bin" : all files except binary executables
 
-/bin/
+/bin/*
 !/bin/*.exe
 !/bin/calculator
 !/bin/a.out
 
 #"/src" : all files except source code
 
-/src/
+/src/*
+!/src/*.h
+!/src/*.c
+!/src/*.cpp
+!/src/lib/
+/src/lib/*
 !/src/*.cpp
 !/src/lib/*.hpp
 !/src/lib/*.c
