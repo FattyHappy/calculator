@@ -14,6 +14,7 @@ Give your answer in the format including no more than one "+" operator with inte
 Such as 123/45, 1+78/45, 2+33/45.
 After the program exits, you can see the log file in folder "./logs".
 Start the program with "start 10" and enjoy!
+
 =============================commands=============================================================
 It's not case sensitive.
 enter "exit" or "quit" to force exit.
