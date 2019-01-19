@@ -2,7 +2,8 @@
 #define __calculator_h__
 
 const static double eps=1e-8;
-const static int operatorNum=10;
+const static int maxOperatorNum=10;
+static int operatorNum=3;
 const static char operators[7]={'+','-','*','/','^','(',')'};
 static int checkerType=0;
 /*  checkerType is used for showing '^' / "**"
@@ -12,7 +13,6 @@ static int checkerType=0;
  *	 '^' = checkerType<2
  *	"**" = checkerType%2==0
  */
-static int num=0; //numbers of equations
 std::map<char,int>priority;
 typedef long long ll;
 inline int rnd(int mod){return((ll)rand()<<32^(ll)rand()<<16^rand())%mod;}
@@ -113,11 +113,15 @@ public:
 class decisionTree{
 public:
 	treeNode* root=NULL;
-	inline void init();//随机生成一个判定树
-	inline void erase();//销毁申请的空间
+	inline void init();//闅忔満鐢熸垚涓�涓垽瀹氭爲
+	inline void erase();//閿�姣佺敵璇风殑绌洪棿
 	decisionTree(){init();}
 	~decisionTree(){erase();}
-	expr gen();//根据判定树生成对应计算表达式
+	expr gen();//鏍规嵁鍒ゅ畾鏍戠敓鎴愬搴旇绠楄〃杈惧紡
 };
 inline void init(int argc,char** argv);
+inline std::pair<std::string,std::string>getinput();
+inline void setting();
+data getNext(decisionTree* T,int &now);
+inline void deal();
 #endif // __calculator__
