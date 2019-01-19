@@ -18,7 +18,9 @@
 		static char obuf[BUF_SIZE],*po=obuf;
 		const static char *oend=obuf+BUF_SIZE;
 		static struct Ostream_fwrite{
-			void out(const register char &ch){*po=ch;if(++po==oend)fwrite(po=obuf,1,BUF_SIZE,fIO.__fastIOOutFile);}
+			void outc(const register char &ch){*po=ch;if(++po==oend)fwrite(po=obuf,1,BUF_SIZE,fIO.__fastIOOutFile);}
+            void outd(register int x){static char tmp[15],*tp;tp=tmp;if (!x)*tp++='0';if(x<0)outc('-'),x=-x;while(x)*tp++=x%10+'0',x/=10;while (tp--!=tmp)outc(*tp);}
+            void outs(std::string S){int l=S.length();for (int i=0;i<l;i++)outc(S[i]);}
 			void flush(){if(po!=obuf)fwrite(obuf,1,po-obuf,fIO.__fastIOOutFile),po=obuf;}
 			~Ostream_fwrite()noexcept{if(po!=obuf)fwrite(obuf,1,po-obuf,fIO.__fastIOOutFile),po=obuf;}
 		}Ostream;
@@ -26,9 +28,14 @@
 		#ifdef __MINGW32__
 		#define fopen_s(a,b,c) (*a)=fopen(b,c)
 		#endif
-			inline bool refreshIn(const char* file){if(fIO.__fastIOInFile!=NULL)fclose(fIO.__fastIOInFile);fopen_s(&fIO.__fastIOInFile,file,"r");return fIO.__fastIOInFile!=NULL;}//返回值为是否修改成功
-			inline bool refreshOut(const char* file){if(fIO.__fastIOOutFile!=NULL){Ostream.flush();fclose(fIO.__fastIOOutFile);}fopen_s(&fIO.__fastIOOutFile,file,"w");return fIO.__fastIOOutFile !=NULL;}//返回值为是否修改成功
-		#define print(x) Ostream.out(x)
+		#ifdef __GNUC__
+		#define fopen_s(a,b,c) (*a)=fopen(b,c)
+		#endif
+			inline bool refreshIn(const char* file){if(fIO.__fastIOInFile!=NULL)fclose(fIO.__fastIOInFile);fopen_s(&fIO.__fastIOInFile,file,"r");return fIO.__fastIOInFile!=NULL;}//杩斿洖鍊间负鏄惁淇敼鎴愬姛
+			inline bool refreshOut(const char* file){if(fIO.__fastIOOutFile!=NULL){Ostream.flush();fclose(fIO.__fastIOOutFile);}fopen_s(&fIO.__fastIOOutFile,file,"w");return fIO.__fastIOOutFile !=NULL;}//杩斿洖鍊间负鏄惁淇敼鎴愬姛
+		#define printc(x) Ostream.outc(x)
+		#define printd(x) Ostream.outd(x)
+		#define prints(x) Ostream.outs(x)
 		#undef BUF_SIZE
 	};
 #endif
