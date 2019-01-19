@@ -21,13 +21,27 @@ std::string data::toString()
 	std::string s="";
 	if (q==1)
 	{
-		ll tmp=p;
+		ll tmp=abs(p);
 		if (!tmp)s="0";
+        if (p<0)s+=')';
 		while (tmp)
 		{
 			s=char('0'+tmp%10)+s;
 			tmp/=10;
 		}
+        if (p<0)s="(-"+s;
+	}else
+	{
+		ll tmp=q;
+		while (tmp)s=char(tmp%10+'0')+s,tmp/=10;
+		s='/'+s;
+		tmp=abs(p);
+		while (tmp)
+		{
+			s=char('0'+tmp%10)+s;
+			tmp/=10;
+		}
+        if (p<0)s='-'+s;
 	}
 	return s;
 }
@@ -40,7 +54,8 @@ expr treeNode::gen()
 	else if (priority[lSon->nodeOpr]<priority[nodeOpr])exprAns.exprString+=std::string("(")+lExpr.exprString+std::string(")");
 	else if (priority[lSon->nodeOpr]==priority[nodeOpr]&&nodeOpr=='^')exprAns.exprString+=std::string("(")+lExpr.exprString+std::string(")");
 	else exprAns.exprString+=lExpr.exprString;
-	exprAns.exprString+=std::string(" ")+nodeOpr+std::string(" ");
+    if (nodeOpr=='^'&&checkerType==2)exprAns.exprString+=std::string(" ** ");
+    else exprAns.exprString+=std::string(" ")+nodeOpr+std::string(" ");
 	if (rSon->type==2)exprAns.exprString+=rExpr.exprString;
 	else if (priority[rSon->nodeOpr]<priority[nodeOpr])exprAns.exprString+=std::string("(")+rExpr.exprString+std::string(")");
 	else if (priority[rSon->nodeOpr]==priority[nodeOpr]&&(nodeOpr=='-'||nodeOpr=='/'))exprAns.exprString+=std::string("(")+rExpr.exprString+std::string(")");
@@ -147,6 +162,7 @@ void expr::solve()
 					S1.push(op);
 				}
 				S2.push(new treeNode('^'));
+                i++;
 				continue;
 			}else
 			{
@@ -243,16 +259,15 @@ void expr::solve()
 	dT.root=S1.top();S1.pop();
 	if (!S1.empty()){rm(S1);rm(S2);return;}
 	ans=dT.gen().ans;
-    std::cout<<dT.gen().exprString<<std::endl;
 	#undef rm
 }
 const static expr NUL("",data(0,1));
 void decisionTree::init()
 {
-	register int point[operatorNum];
+	register int point[maxOperatorNum];
 	for (register int i=0;i<operatorNum;++i)point[i]=i;
 	for (register int i=0;i<10*operatorNum;++i)std::swap(point[rnd(operatorNum)],point[rnd(operatorNum)]);
-	treeNode** points=new treeNode*[operatorNum];
+	treeNode** points=new treeNode*[maxOperatorNum];
 	for (register int i=0;i<operatorNum;i++)points[i]=new treeNode();
 	std::vector<int>nonEmptyPoint;
 	nonEmptyPoint.push_back(point[0]);nonEmptyPoint.push_back(point[0]);
@@ -348,64 +363,226 @@ expr decisionTree::gen()
 	}
 	return root->gen();
 }
-inline void init(int argc,char** argv)
+inline void showHelp()
 {
-	assert(argc==3);
-    assert(refreshOut((const char*)argv[1]));
-    int len = int(strlen(argv[2]));
-    num = 0;
-	for (int i = 0; i < len; i++)
+    puts("===========================introduction=============================");
+	puts("Several formulas will be generated, including integers in the range [0,20) ");
+	puts("and operators: addition[+]/subtraction[-]/multiplication[*]/division[/]/power[**|^].");
+	puts("Brackets['(' and ')'] is also supported.");
+    puts("Note that the number of operators cannot exceed 10.");
+	puts("And the answer and intermediate calculation result won't be larger than 1e10 or smaller than 1e-8.");
+    puts("There is no decimals or root symbols, such as \"0.123\" or \"√2\" [2^(0.5)].");
+	puts("Give your answer in the format including no more than one \"+\" operator with integers and fractions.");
+	puts("Such as 123/45, 1+78/45, 2+33/45.");
+    puts("After the program exits, you can see the log file in folder \"./logs\".");
+    puts("Start the program with \"start 10\" and enjoy!");
+    puts("=============================commands===============================");
+    puts("It's not case sensitive.");
+    puts("enter \"exit\" or \"quit\" to force exit.");
+    puts("enter \"setting\" to view settings in any time.");
+	puts("To change power type, enter \"setpower\"+[number], e.g. \"setpower 1\".");
+	puts("To change operation numbers, enter \"setopnum\"+[number], e.g. \"setopnum 5\".");
+    puts("If you are ready, enter \"start\"+[number of formulas], e.g. \"start 10\".");
+    puts("To submit an answer, enter \"answer\"+[your answer], e.g. \"answer 5/2\".");
+    puts("To submit an custom formula and ask for an answer, enter \"calc\"+[your formula], e.g \"calc 2^(-3)**3\".");
+}
+inline void init()
+{
+    system("if not exist \".\\logs\" mkdir .\\logs");
+    time_t __time=time(NULL);
+    char addr[20]="gol.";int ptr=4;
+    while (__time)addr[ptr++]=__time%10+'0',__time/=10;
+    addr[ptr++]='\\';addr[ptr++]='s';addr[ptr++]='g';addr[ptr++]='o';addr[ptr++]='l';
+    for (int i=0;i+i<ptr;i++)std::swap(addr[i],addr[ptr-i-1]);
+    if (!refreshOut((const char*)addr))
 	{
-		assert(argv[2][i]>='0'&&argv[2][i]<='9');
-		num = num * 10 + argv[2][i] - '0';
+        puts("Failed to open log file!");
+        system("pause");
+        exit(0);
 	}
-    assert(num>=1&&num<=1000);
-	priority['+']=priority['-']=1;
+    priority['+']=priority['-']=1;
 	priority['*']=priority['/']=2;
     priority['^']=3;
     priority['(']=4;
     srand(time(0)^19260817);
+    puts("Welcome to calculator project.");
+    puts("enter \"help\" for more info.");
+    puts("enter \"exit\" to force exit.");
+    putchar('>');
 }
-int main(int argc,char** argv)
+inline std::pair<std::string,std::string>getinput()
 {
-    init(argc,argv);
-    decisionTree* T=new decisionTree[1005];
-    for (register int i=0;i<num;i++)
+    std::string s,operation,content;
+    getline(std::cin,s);
+    register int i,l=s.length();
+    for (i=0;i<l;i++)
 	{
-        expr ans=T[i].gen();
-        bool mrk=1;
-        do
+        if (s[i]!=' '&&s[i]!='\t')
 		{
-            mrk=1;
-			for (register int j=0;j<i;j++)
-				if (T[j].root->same(T[i].root))
-				{
-					mrk=0;
-					break;
-				}
-			if (mrk==0)
+			operation+=s[i]>='A'&&s[i]<='Z'?s[i]+32:s[i];
+		}else
+		{
+            if (operation.length())break;
+		}
+	}
+    for (i++;i<l;i++)content+=s[i];
+    return make_pair(operation,content);
+}
+inline void setting()
+{
+    printf("power type = %d  ,  operator numbers = %d\n",checkerType,operatorNum);
+    puts("power type is used for showing power operator '^' / \"**\".");
+    puts("0: '^' or \"**\" is supported.");
+    puts("1: '^' only.");
+    puts("2:\"**\" only.");
+    puts("To set a new power type, use \"setpower\"+[new number], e.g. \"setpower 2\".");
+	puts("To set a new operation numbers, use \"setopnum\"+[new number], e.g. \"setopnum 2\".");
+}
+data getNext(decisionTree* T,int &now)
+{
+    T[now].erase();
+    T[now].init();
+	expr ans=T[now].gen();
+	bool mrk=1;
+	do
+	{
+		mrk=1;
+		for (register int j=0;j<now;j++)
+			if (T[j].root->same(T[now].root))
 			{
-                T[i].erase();
-                T[i].init();
-				ans=T[i].gen();
+				mrk=0;
+				break;
 			}
-		}while (mrk==0);
-		register int l=ans.exprString.length();
-		for (register int j=0;j<l;j++)print(ans.exprString[j]);
-        print('\n');
-        std::cout<<ans.exprString<<std::endl;
-        std::cout<<ans.ans.p<<'/'<<ans.ans.q<<' '<<std::endl;
-        for (int i=0;i<ans.exprString.length();i++)print(ans.exprString[i]);
+		if (mrk==0)
+		{
+			T[now].erase();
+			T[now].init();
+			ans=T[now].gen();
+		}
+	}while (mrk==0);
+    printf("%d:\n",++now);
+    printd(now);printc(':');printc('\n');
+    std::cout<<ans.exprString<<std::endl;
+    prints(ans.exprString);printc('\n');
+    return ans.ans;
+}
+inline void deal()
+{
+	std::pair<std::string,std::string>wrk;
+    decisionTree* T=new decisionTree[1005];
+    int now=0,tot=0,AC=0;
+    data nowAns(0,0);
+    while (wrk=getinput(),true)
+	{
+        std::string operation=wrk.first,content=wrk.second;
+        if (!operation.compare(std::string("exit"))||!operation.compare(std::string("quit")))
+		{
+            delete[] T;
+            exit(0);
+		}else if (!operation.compare(std::string("help")))
+		{
+			showHelp();
+		}else if (!operation.compare(std::string("setting")))
+		{
+            setting();
+		}else if (!operation.compare(std::string("setpower")))
+		{
+            int d=0,l=content.length();
+            bool mrk=1;
+            for (int i=0;i<l;i++)
+			{
+				if (content[i]<'0'||content[i]>'9')mrk=0;
+				d=d*10+content[i]-'0';
+			}
+            mrk&=(d>=0&&d<=2);
+            if (mrk)checkerType=d;else puts("invalid parameter!");
+		}else if (!operation.compare(std::string("setopnum")))
+		{
+            int d=0,l=content.length();
+            bool mrk=1;
+            for (int i=0;i<l;i++)
+			{
+				if (content[i]<'0'||content[i]>'9')mrk=0;
+				d=d*10+content[i]-'0';
+			}
+            mrk&=(d>=1&&d<=10);
+            if (mrk)operatorNum=d;else puts("invalid parameter!");
+		}else if (!operation.compare(std::string("calc")))
+		{
+            expr S(content);
+            S.solve();
+            if (S.ans==data(0,0))puts("Invalid formula! Check if your input.");
+            else std::cout<<"Your answer equals "<<S.ans.toString()<<"  ."<<std::endl;
+		}else if (!operation.compare(std::string("start")))
+		{
+			int d=0,l=content.length();
+            bool mrk=1;
+            for (int i=0;i<l;i++)
+			{
+				if (content[i]<'0'||content[i]>'9')mrk=0;
+				d=d*10+content[i]-'0';
+			}
+            mrk&=(d>=1&&d<=1000);
+            if (mrk){tot=d;nowAns=getNext(T,now);}else puts("invalid parameter!");
+		}else if (!operation.compare(std::string("answer")))
+		{
+            int l=content.length();
+            bool mrk=1;int sumPlus=0,sumDiv=0,sumSub=0;
+            for (int i=0;i<l;i++)
+			{
+                if (content[i]=='*'||content[i]=='^'||content[i]=='('||content[i]==')')mrk=0;
+                else if (content[i]=='+')
+				{
+					sumPlus++;
+					if (sumPlus>1)mrk=0;
+				}else if (content[i]=='-')
+				{
+                    sumSub++;
+                    if (sumSub>1)mrk=0;
+				}else if (content[i]=='/')
+				{
+					sumDiv++;
+					if (sumDiv>2)mrk=0;
+				}else if ((content[i]<'0'||content[i]>'9')&&content[i]!=' '&&content[i]!='\t')mrk=0;
+			}
+			prints(std::string("Answer: "+nowAns.toString()+"\n"));
+            prints(std::string("Your answer: "));
+            if (!mrk)
+			{
+				puts("Not a valid answer.");
+                prints(std::string("invalid and not judged\n"));
+                prints(std::string("Incorrect\n"));
+			}
+            else
+			{
+                expr S(content);
+                if (S.solve(),S.ans==nowAns)
+				{
+					puts("Congratulations! Your answer is correct!");
+					prints(std::string(content+"\n"));
+					prints(std::string("Correct\n"));
+					AC++;
+				}else
+				{
+					puts("Ooops, your answer is incorrect.");
+					prints(std::string(content+"\n"));
+					prints(std::string("Incorrect\n"));
+				}
+			}
+			if (now==tot)break;
+            nowAns=getNext(T,now);
+		}else puts("unknown command.");
+		putchar('>');
 	}
 	delete[] T;
-    puts("test?[y/n]");
-    char tep=getchar();while (tep!='y'&&tep!='n'&&tep!='Y'&&tep!='N')tep=getchar();
-    if (tep=='N'||tep=='n')return 0;
-    getchar();
-	expr S;
-    while (std::getline(std::cin,S.exprString))
-	{
-		S.solve();
-        std::cout<<S.ans.p<<'/'<<S.ans.q<<std::endl;
-	}
+    printf("Totally %d problems. You solved %d of them.\n",tot,AC);
+    printf("Correct rate = %.2f%\n",100.0*AC/tot);
+    prints(std::string("\nend\n"));
+    printd(AC);printc('/');printd(tot);
+    system("pause");
+}
+int main()
+{
+    init();
+    deal();
 }
