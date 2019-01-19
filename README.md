@@ -24,3 +24,5 @@ If you are ready, enter "start"+[number of formulas], e.g. "start 10".
 To submit an answer, enter "answer"+[your answer], e.g. "answer 5/2".
 To submit an custom formula and ask for an answer, enter "calc"+[your formula], e.g "calc 2^(-3)**3".
 
+——————————————————————————————————————————————————————————————————————————————————————————————————
+下面的软件工程基础结对.exe为项目展示程序
